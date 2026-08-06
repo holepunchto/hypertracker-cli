@@ -1,0 +1,71 @@
+{
+  "name": "hypertracker-cli",
+  "version": "0.1.0",
+  "description": "CLI to run a hypertracker service",
+  "main": "bin.js",
+  "bin": {
+    "hypertracker": "bin.js",
+    "hypertracker-bare": "bin-bare.js"
+  },
+  "files": [
+    "bin-bare.js",
+    "bin.js"
+  ],
+  "scripts": {
+    "format": "prettier --write . && lunte --fix",
+    "lint": "prettier --check . && lunte",
+    "test": "brittle -c test.js",
+    "test-bare": "brittle-bare -c test.js"
+  },
+  "dependencies": {
+    "b4a": "^1.8.1",
+    "graceful-goodbye": "^1.3.3",
+    "hyper-instrument": "^3.2.1",
+    "hypercore-id-encoding": "^1.3.0",
+    "hypertracker": "^2.0.0",
+    "paparam": "^1.10.2",
+    "pino": "^10.3.1",
+    "pino-bare": "^0.1.0"
+  },
+  "devDependencies": {
+    "bare-path": "^3.0.0",
+    "bare-process": "^4.2.2",
+    "bare-subprocess": "^5.2.2",
+    "brittle": "^3.19.1",
+    "hypercore-crypto": "^3.6.1",
+    "hyperdht": "^6.29.0",
+    "lunte": "^1.8.4",
+    "newline-decoder": "^1.0.2",
+    "prettier": "^3.9.6",
+    "prettier-config-holepunch": "^2.0.0",
+    "which-runtime": "^1.3.2"
+  },
+  "imports": {
+    "child_process": {
+      "bare": "bare-subprocess",
+      "default": "child_process"
+    },
+    "path": {
+      "bare": "bare-path",
+      "default": "path"
+    },
+    "pino": {
+      "bare": "pino-bare",
+      "default": "pino"
+    },
+    "process": {
+      "bare": "bare-process",
+      "default": "process"
+    }
+  },
+  "author": "Holepunch Inc.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holepunchto/hypertracker-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/holepunchto/hypertracker-cli/issues"
+  },
+  "homepage": "https://github.com/holepunchto/hypertracker-cli#readme"
+}
