@@ -69,16 +69,13 @@ test('bin', async (t) => {
   const announcerDht = new HyperDHT({ bootstrap: testnet.bootstrap })
   t.teardown(() => announcerDht.destroy(), { order: 4000 })
 
-  const subscriber = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: subscriberDht })
-  t.teardown(() => subscriber.close(), { order: 3000 })
-  const announcer = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: announcerDht })
-  t.teardown(() => announcer.close(), { order: 3000 })
-
   const keyPair = crypto.keyPair()
   const announced = t.test('announce event received')
   announced.plan(1)
   let receivedAnnounce = false
 
+  const subscriber = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: subscriberDht })
+  t.teardown(() => subscriber.close(), { order: 3000 })
   subscriber.on('announce', (ann) => {
     if (receivedAnnounce) return
     receivedAnnounce = true
@@ -89,6 +86,11 @@ test('bin', async (t) => {
   })
   subscriber.connect()
 
+  // Give the subscriber a chance to connect and subscribe to the announcer.
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+
+  const announcer = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: announcerDht })
+  t.teardown(() => announcer.close(), { order: 3000 })
   announcer.on('connect', async () => {
     for (let attempt = 0; attempt < 10 && !receivedAnnounce; attempt++) {
       subscriber.subscribe(keyPair.publicKey)
