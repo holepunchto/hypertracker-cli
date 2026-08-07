@@ -71,26 +71,33 @@ test('bin', async (t) => {
 
   const subscriber = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: subscriberDht })
   t.teardown(() => subscriber.close(), { order: 3000 })
-  await connect(subscriber)
-
-  const keyPair = crypto.keyPair()
-  subscriber.on('announce', (ann) => {
-    announced.alike(ann.publicKey, keyPair.publicKey, 'announced public key matches')
-  })
-  subscriber.subscribe(keyPair.publicKey)
-
   const announcer = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: announcerDht })
   t.teardown(() => announcer.close(), { order: 3000 })
-  await connect(announcer)
 
+  const keyPair = crypto.keyPair()
   const announced = t.test('announce event received')
   announced.plan(1)
-  await new Promise((resolve) => setTimeout(resolve, 2000))
-  announcer.announce(keyPair)
+  let receivedAnnounce = false
+
+  subscriber.on('announce', (ann) => {
+    if (receivedAnnounce) return
+    receivedAnnounce = true
+    announced.alike(ann.publicKey, keyPair.publicKey, 'announced public key matches')
+  })
+  subscriber.on('connect', () => {
+    subscriber.subscribe(keyPair.publicKey)
+  })
+  subscriber.connect()
+
+  announcer.on('connect', async () => {
+    for (let attempt = 0; attempt < 10 && !receivedAnnounce; attempt++) {
+      subscriber.subscribe(keyPair.publicKey)
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      if (receivedAnnounce) break
+      announcer.announce(keyPair)
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    }
+  })
+  announcer.connect()
   await announced
 })
-
-function connect(client) {
-  client.connect()
-  return new Promise((resolve) => client.once('connect', resolve))
-}
