@@ -4,6 +4,7 @@ const path = require('path')
 const process = require('process')
 const crypto = require('hypercore-crypto')
 const IdEnc = require('hypercore-id-encoding')
+const HyperDHT = require('hyperdht')
 const createTestnet = require('hyperdht/testnet')
 const NewlineDecoder = require('newline-decoder')
 const { isBare } = require('which-runtime')
@@ -63,28 +64,29 @@ test('bin', async (t) => {
 
   await started
 
-  const subscriber = new HyperTrackerClient(IdEnc.decode(publicKey), {
-    bootstrap: testnet.bootstrap
-  })
+  const subscriberDht = new HyperDHT({ bootstrap: testnet.bootstrap })
+  t.teardown(() => subscriberDht.destroy(), { order: 4000 })
+  const announcerDht = new HyperDHT({ bootstrap: testnet.bootstrap })
+  t.teardown(() => announcerDht.destroy(), { order: 4000 })
+
+  const subscriber = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: subscriberDht })
   t.teardown(() => subscriber.close(), { order: 3000 })
   await connect(subscriber)
-
-  const announcer = new HyperTrackerClient(IdEnc.decode(publicKey), {
-    bootstrap: testnet.bootstrap
-  })
-  t.teardown(() => announcer.close(), { order: 3000 })
-  await connect(announcer)
-
-  const announced = t.test('announce event received')
-  announced.plan(1)
 
   const keyPair = crypto.keyPair()
   subscriber.on('announce', (ann) => {
     announced.alike(ann.publicKey, keyPair.publicKey, 'announced public key matches')
   })
   subscriber.subscribe(keyPair.publicKey)
-  await announcer.announce(keyPair)
 
+  const announcer = new HyperTrackerClient(IdEnc.decode(publicKey), { dht: announcerDht })
+  t.teardown(() => announcer.close(), { order: 3000 })
+  await connect(announcer)
+
+  const announced = t.test('announce event received')
+  announced.plan(1)
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+  announcer.announce(keyPair)
   await announced
 })
 

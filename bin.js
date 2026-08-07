@@ -5,6 +5,7 @@ const { HyperTracker } = require('hypertracker')
 const Instrumentation = require('hyper-instrument')
 const goodbye = require('graceful-goodbye')
 const IdEnc = require('hypercore-id-encoding')
+const HyperDHT = require('hyperdht')
 const pino = require('pino')
 const b4a = require('b4a')
 
@@ -31,12 +32,13 @@ const run = command(
     const logger = pino({ name: 'hypertracker' })
     const storage = flags.storage || DEFAULT_STORAGE
     const bootstrap = flags.bootstrap ? JSON.parse(flags.bootstrap) : undefined
-    logger.info(`Starting discovery service with storage: ${storage}`)
+    logger.info(`Starting tracker service with storage: ${storage}`)
 
-    const discovery = new HyperTracker(storage, { bootstrap })
-    await discovery.ready()
-    logger.info(`Hypertracker public key: ${b4a.toString(discovery.publicKey, 'hex')}`)
-    logger.info(`Hypertracker public key (z32): ${IdEnc.normalize(discovery.publicKey)}`)
+    const dht = new HyperDHT({ bootstrap })
+    const tracker = new HyperTracker(storage, { dht })
+    await tracker.ready()
+    logger.info(`Hypertracker public key: ${b4a.toString(tracker.publicKey, 'hex')}`)
+    logger.info(`Hypertracker public key (z32): ${IdEnc.normalize(tracker.publicKey)}`)
 
     let instrumentation = null
     goodbye(async () => {
@@ -44,8 +46,9 @@ const run = command(
         logger.info('Closing instrumentation...')
         await instrumentation.close()
       }
-      logger.info('Shutting down discovery service...')
-      await discovery.close()
+      logger.info('Shutting down tracker service...')
+      await tracker.close()
+      await dht.destroy()
       logger.info('Shut down')
     })
 
@@ -60,11 +63,11 @@ const run = command(
         throw new Error('The Prometheus alias must have length less than 100')
       }
       if (!prometheusAlias) {
-        prometheusAlias = `hypertracker-${IdEnc.normalize(discovery.publicKey)}`
+        prometheusAlias = `hypertracker-${IdEnc.normalize(tracker.publicKey)}`
       }
 
       instrumentation = new Instrumentation({
-        dht: discovery.dht,
+        dht: tracker.dht,
         scraperPublicKey,
         prometheusAlias,
         scraperSecret,
@@ -72,7 +75,7 @@ const run = command(
         version: ownVersion
       })
 
-      discovery.registerMetrics(instrumentation.promClient)
+      tracker.registerMetrics(instrumentation.promClient)
 
       instrumentation.registerLogger(logger)
       await instrumentation.ready()
