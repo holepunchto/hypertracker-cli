@@ -27,12 +27,6 @@ hypertracker-bare run --help
 - `--scraper-alias <alias>` — (optional) Alias with which to register to the scraper.
 - `--bootstrap <nodes>` — (optional) Bootstrap nodes for the DHT, as a JSON array.
 
-## Example
-
-```shell
-hypertracker run --storage ./my-hypertracker-store
-```
-
 ## License
 
 Apache-2.0
