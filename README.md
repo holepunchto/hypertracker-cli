@@ -22,8 +22,8 @@ hypertracker-bare run --help
 ### Flags
 
 - `--storage, -s <path>` — Storage path, defaults to `./hypertracker-storage`
-- `--scraper-public-key <key>` — Public key of a hyper-dht-prometheus scraper. Can be hex or z32.
-- `--scraper-secret <secret>` — Secret of the hyper-dht-prometheus scraper. Can be hex or z32.
+- `--scraper-public-key <key>` — Public key of a hyperdht-prometheus scraper. Can be hex or z32.
+- `--scraper-secret <secret>` — Secret of the hyperdht-prometheus scraper. Can be hex or z32.
 - `--scraper-alias <alias>` — (optional) Alias with which to register to the scraper.
 - `--bootstrap <nodes>` — (optional) Bootstrap nodes for the DHT, as a JSON array.
 
