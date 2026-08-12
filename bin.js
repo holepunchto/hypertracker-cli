@@ -19,11 +19,11 @@ const run = command(
   flag('--storage|-s [path]', `Storage path, defaults to ${DEFAULT_STORAGE}`),
   flag(
     '--scraper-public-key [scraper-public-key]',
-    'Public key of a hyperdht-prometheus scraper. Can be hex or z32.'
+    'Public key of a hyperdht-prometheus-bridge scraper. Can be hex or z32.'
   ),
   flag(
     '--scraper-secret [scraper-secret]',
-    'Secret of the hyperdht-prometheus scraper. Can be hex or z32.'
+    'Secret of the hyperdht-prometheus-bridge scraper. Can be hex or z32.'
   ),
   flag('--scraper-alias [scraper-alias]', '(optional) Alias with which to register to the scraper'),
   flag('--bootstrap [bootstrap]', 'Bootstrap nodes for the DHT'),
