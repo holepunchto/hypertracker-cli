@@ -1,6 +1,6 @@
 {
   "name": "hypertracker-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI to run a hypertracker service",
   "main": "bin.js",
   "bin": {
